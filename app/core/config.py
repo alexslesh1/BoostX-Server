@@ -54,6 +54,25 @@ class Settings(BaseSettings):
     # --- Rate limiting ---
     RATE_LIMIT_STORAGE_URI: str = Field(default="")  # empty = in-memory
 
+    # --- Boost Discord (per-user SOCKS5 proxy relay) ---
+    # Public address of the 3proxy relay the desktop client connects to.
+    PROXY_HOST: str = Field(default="194.87.200.215")
+    PROXY_PORT: int = Field(default=1080)
+    # Fernet key (44-char urlsafe-base64) used to encrypt proxy passwords at
+    # rest. Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+    PROXY_CREDENTIALS_ENCRYPTION_KEY: str = Field(default="change-me-generate-a-real-fernet-key")
+    # Path to 3proxy's `users` auth file (format: `login:CL:password` per line).
+    # Only used when the app server and the 3proxy relay run on the same host.
+    PROXY_3PROXY_USERS_FILE: str = Field(default="/usr/local/etc/3proxy/conf/users")
+    # Shell command run (via subprocess) after rewriting the users file so
+    # 3proxy picks up the new credential list. Must be executable by the
+    # app server's OS user (e.g. a scoped sudoers rule for this one command).
+    PROXY_3PROXY_RELOAD_COMMAND: str = Field(default="systemctl reload 3proxy")
+    # If false, credential provisioning still writes to the DB but skips
+    # touching the 3proxy users file / reload — useful for local dev or a
+    # deployment where the app server and relay are on different hosts.
+    PROXY_SYNC_3PROXY_FILE: bool = Field(default=True)
+
     @property
     def cors_origins_list(self) -> list[str]:
         if self.CORS_ORIGINS.strip() == "*":

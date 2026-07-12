@@ -15,6 +15,7 @@ from typing import Any
 
 import bcrypt
 import jwt
+from cryptography.fernet import Fernet
 
 from app.core.config import settings
 
@@ -114,3 +115,30 @@ def verification_code_expiry() -> datetime:
     return datetime.now(timezone.utc) + timedelta(
         minutes=settings.VERIFICATION_CODE_EXPIRE_MINUTES
     )
+
+
+# --------------------------------------------------------------------------
+# Proxy credentials (Boost Discord) — reversibly encrypted, not hashed,
+# because the server must recover the plaintext to authenticate the client
+# and to write 3proxy's users file.
+# --------------------------------------------------------------------------
+def _fernet() -> Fernet:
+    return Fernet(settings.PROXY_CREDENTIALS_ENCRYPTION_KEY.encode("utf-8"))
+
+
+def encrypt_secret(plain_text: str) -> str:
+    return _fernet().encrypt(plain_text.encode("utf-8")).decode("utf-8")
+
+
+def decrypt_secret(token: str) -> str:
+    return _fernet().decrypt(token.encode("utf-8")).decode("utf-8")
+
+
+def generate_proxy_login(user_id: uuid.UUID) -> str:
+    """A short, unique, colon-free login safe for 3proxy's `login:CL:password` file."""
+    return f"bx{user_id.hex[:12]}"
+
+
+def generate_proxy_password() -> str:
+    """A colon-free, URL-safe secret (3proxy's users file is colon-delimited)."""
+    return secrets.token_urlsafe(18)

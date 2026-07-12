@@ -26,6 +26,7 @@ from app.repositories.user_repository import UserRepository
 from app.repositories.verification_repository import VerificationRepository
 from app.schemas.device import DeviceIn
 from app.services.email_service import email_service
+from app.services.proxy_service import ProxyService
 from app.services.token_service import TokenService
 
 
@@ -37,6 +38,7 @@ class AuthService:
         self.device_repo = DeviceRepository(session)
         self.verification_repo = VerificationRepository(session)
         self.token_service = TokenService(session)
+        self.proxy_service = ProxyService(session)
 
     # ------------------------------------------------------------------
     # Registration
@@ -50,9 +52,15 @@ class AuthService:
         password_hash = hash_password(password)
         user = await self.user_repo.create(username, email, password_hash)
         await self.subscription_repo.create_default(user.id)
+        await self.proxy_service.provision_for_user(user.id)
         await self._issue_and_send_code(user, VerificationPurpose.EMAIL_VERIFY)
 
         await self.session.commit()
+        # Proxy credentials are only useful once committed — sync the 3proxy
+        # users file after the transaction succeeds, not before. A sync
+        # failure here is logged and self-heals on the next sync, never
+        # blocks registration.
+        await self.proxy_service.sync_users_file()
         return user.id
 
     # ------------------------------------------------------------------

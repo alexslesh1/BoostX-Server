@@ -13,6 +13,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.device import Device
+    from app.models.proxy_credential import ProxyCredential
     from app.models.refresh_token import RefreshToken
     from app.models.subscription import Subscription
     from app.models.verification_code import VerificationCode
@@ -52,6 +53,9 @@ class User(Base):
     )
     verification_codes: Mapped[list["VerificationCode"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
+    )
+    proxy_credential: Mapped["ProxyCredential"] = relationship(
+        back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:  # pragma: no cover

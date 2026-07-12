@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.api.v1 import auth, devices, health, launcher, payments, subscriptions, users
+from app.api.v1 import auth, devices, health, launcher, payments, proxy, subscriptions, users
 
 api_router = APIRouter()
 
@@ -14,3 +14,4 @@ api_router.include_router(subscriptions.router)
 api_router.include_router(devices.router)
 api_router.include_router(payments.router)
 api_router.include_router(launcher.router)
+api_router.include_router(proxy.router)
