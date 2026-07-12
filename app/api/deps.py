@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import uuid
-from collections.abc import AsyncGenerator
 
 import jwt
 from fastapi import Depends
