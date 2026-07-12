@@ -8,6 +8,7 @@ from app.models.refresh_token import RefreshToken
 from app.models.subscription import Subscription, SubscriptionPlan, SubscriptionStatus
 from app.models.user import User
 from app.models.verification_code import VerificationCode, VerificationPurpose
+from app.models.wireguard_peer import WireguardPeer
 
 __all__ = [
     "Device",
@@ -19,4 +20,5 @@ __all__ = [
     "User",
     "VerificationCode",
     "VerificationPurpose",
+    "WireguardPeer",
 ]

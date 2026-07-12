@@ -16,6 +16,8 @@ from typing import Any
 import bcrypt
 import jwt
 from cryptography.fernet import Fernet
+from nacl.encoding import Base64Encoder
+from nacl.public import PrivateKey
 
 from app.core.config import settings
 
@@ -142,3 +144,18 @@ def generate_proxy_login(user_id: uuid.UUID) -> str:
 def generate_proxy_password() -> str:
     """A colon-free, URL-safe secret (3proxy's users file is colon-delimited)."""
     return secrets.token_urlsafe(18)
+
+
+# --------------------------------------------------------------------------
+# WireGuard keypairs — Curve25519, generated with PyNaCl rather than
+# shelling out to `wg genkey`/`wg pubkey`. PyNaCl's PrivateKey.generate()
+# performs the same X25519 key clamping libsodium/WireGuard both use, so
+# the base64-encoded 32-byte output is bit-for-bit compatible with keys
+# `wg` itself would produce.
+# --------------------------------------------------------------------------
+def generate_wireguard_keypair() -> tuple[str, str]:
+    """Returns (private_key_b64, public_key_b64)."""
+    private_key = PrivateKey.generate()
+    private_b64 = private_key.encode(encoder=Base64Encoder).decode("ascii")
+    public_b64 = private_key.public_key.encode(encoder=Base64Encoder).decode("ascii")
+    return private_b64, public_b64
