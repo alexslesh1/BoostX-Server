@@ -1,7 +1,7 @@
 [project]
 name = "boostx-server"
 version = "0.1.0"
-description = "Backend API for the BoostX desktop client (PySide6 system monitor / booster / game launcher)."
+description = "Backend API for the Nexora desktop client (PySide6 system monitor / booster / game launcher)."
 readme = "README.md"
 requires-python = ">=3.13"
 license = { text = "Proprietary" }

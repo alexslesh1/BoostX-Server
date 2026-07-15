@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     )
 
     # --- App ---
-    APP_NAME: str = "BoostX Server"
+    APP_NAME: str = "Nexora Server"
     APP_VERSION: str = "0.1.0"
     APP_ENV: str = Field(default="local")  # local | production
     DEBUG: bool = Field(default=True)

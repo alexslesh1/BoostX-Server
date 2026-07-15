@@ -42,8 +42,8 @@ class EmailService:
     async def send_verification_code(self, to_email: str, code: str) -> None:
         await self.send(
             to_email,
-            subject="Your BoostX verification code",
-            body=f"Your BoostX verification code is: {code}\n\nThis code expires in "
+            subject="Your Nexora verification code",
+            body=f"Your Nexora verification code is: {code}\n\nThis code expires in "
             f"{settings.VERIFICATION_CODE_EXPIRE_MINUTES} minutes. "
             "If you did not request this, you can safely ignore this email.",
         )
@@ -51,8 +51,8 @@ class EmailService:
     async def send_password_reset_code(self, to_email: str, code: str) -> None:
         await self.send(
             to_email,
-            subject="Reset your BoostX password",
-            body=f"Your BoostX password reset code is: {code}\n\nThis code expires in "
+            subject="Reset your Nexora password",
+            body=f"Your Nexora password reset code is: {code}\n\nThis code expires in "
             f"{settings.VERIFICATION_CODE_EXPIRE_MINUTES} minutes. "
             "If you did not request this, you can safely ignore this email.",
         )
@@ -60,8 +60,8 @@ class EmailService:
     async def send_email_change_code(self, to_email: str, code: str) -> None:
         await self.send(
             to_email,
-            subject="Confirm your new BoostX email address",
-            body=f"Your BoostX email change confirmation code is: {code}\n\nThis code expires "
+            subject="Confirm your new Nexora email address",
+            body=f"Your Nexora email change confirmation code is: {code}\n\nThis code expires "
             f"in {settings.VERIFICATION_CODE_EXPIRE_MINUTES} minutes. "
             "If you did not request this, you can safely ignore this email.",
         )

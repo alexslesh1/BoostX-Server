@@ -1,6 +1,6 @@
-# BoostX Server
+# Nexora Server
 
-Backend API for **BoostX**, a PySide6 (Qt) desktop application (system monitor / booster / game launcher). This service is purpose-built to serve that desktop client — authentication, user profiles, subscriptions, and device management — and is not a generic auth server.
+Backend API for **Nexora**, a PySide6 (Qt) desktop application (system monitor / booster / game launcher). This service is purpose-built to serve that desktop client — authentication, user profiles, subscriptions, and device management — and is not a generic auth server.
 
 Tech stack: Python 3.13, FastAPI, PostgreSQL, SQLAlchemy 2.0 (async ORM), Alembic, asyncpg, Pydantic v2, `bcrypt`, `PyJWT`, `aiosmtplib`, slowapi (rate limiting), Docker.
 

@@ -7,7 +7,7 @@ from app.main import app
 
 
 def test_app_builds() -> None:
-    assert app.title == "BoostX Server"
+    assert app.title == "Nexora Server"
 
 
 def test_health_endpoint() -> None:

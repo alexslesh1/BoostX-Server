@@ -34,8 +34,8 @@ from app.repositories.wireguard_repository import WireguardRepository
 logger = get_logger(__name__)
 
 _RELOAD_TIMEOUT_SECONDS = 10
-_MANAGED_BEGIN = "# BEGIN BOOSTX MANAGED PEERS — do not edit this block by hand"
-_MANAGED_END = "# END BOOSTX MANAGED PEERS"
+_MANAGED_BEGIN = "# BEGIN NEXORA MANAGED PEERS — do not edit this block by hand"
+_MANAGED_END = "# END NEXORA MANAGED PEERS"
 
 
 class WireguardService:
