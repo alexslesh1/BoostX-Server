@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-boostx}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-boostx}
+      POSTGRES_DB: ${POSTGRES_DB:-boostx}
+    ports:
+      - "5432:5432"
+    volumes:
+      - boostx_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-boostx} -d ${POSTGRES_DB:-boostx}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-boostx}:${POSTGRES_PASSWORD:-boostx}@db:5432/${POSTGRES_DB:-boostx}
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+volumes:
+  boostx_postgres_data:
