@@ -140,6 +140,15 @@ RELAY_SERVERS=[{"id":"fra1","name":"Frankfurt","region":"EU","address":"203.0.11
 
 `relay.json` and `RELAY_TOKEN_SECRET` are secrets: keep them on the servers only.
 
+## Test account
+
+```sh
+docker compose exec app python -m app.scripts.create_test_account                     # tester@example.com, pro, 30 days
+docker compose exec app python -m app.scripts.create_test_account --plan lifetime --email you@example.com
+```
+
+Creates the account with its email already verified and an active subscription, and prints a fresh password. Running it again for the same email resets the password and the subscription.
+
 ## API reference
 
 Base path: `/api/v1`. Endpoints marked "auth" require an `Authorization: Bearer <access_token>` header.

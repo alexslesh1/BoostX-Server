@@ -139,6 +139,9 @@ next to Nexora.exe:
 
   http://$PUBLIC_IP:8000/api/v1
 
+Test account (verified, active pro subscription, password printed once):
+  docker compose exec app python -m app.scripts.create_test_account
+
 Logs:  journalctl -u nexora-relay -f     docker compose logs -f app
 For another relay on another VPS, run there:
   sudo RELAY_ONLY=1 TOKEN_SECRET='$RELAY_SECRET' ./deploy/setup-server.sh
