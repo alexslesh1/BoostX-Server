@@ -6,7 +6,10 @@ generated with `secrets` and stored only as a SHA-256 hash.
 """
 from __future__ import annotations
 
+import base64
 import hashlib
+import hmac
+import json
 import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -16,8 +19,6 @@ from typing import Any
 import bcrypt
 import jwt
 from cryptography.fernet import Fernet
-from nacl.encoding import Base64Encoder
-from nacl.public import PrivateKey
 
 from app.core.config import settings
 
@@ -147,15 +148,24 @@ def generate_proxy_password() -> str:
 
 
 # --------------------------------------------------------------------------
-# WireGuard keypairs — Curve25519, generated with PyNaCl rather than
-# shelling out to `wg genkey`/`wg pubkey`. PyNaCl's PrivateKey.generate()
-# performs the same X25519 key clamping libsodium/WireGuard both use, so
-# the base64-encoded 32-byte output is bit-for-bit compatible with keys
-# `wg` itself would produce.
+# Relay session tokens. A relay never talks to this backend: it only checks
+# the HMAC with the secret both sides share, which keeps relays stateless
+# and lets new ones be added without touching the database.
+#
+# Format (must match nexora-core/proto/token.go):
+#   base64url(json{"uid","dev","exp"}) "." base64url(hmac-sha256(secret, first part))
+# with unpadded base64url.
 # --------------------------------------------------------------------------
-def generate_wireguard_keypair() -> tuple[str, str]:
-    """Returns (private_key_b64, public_key_b64)."""
-    private_key = PrivateKey.generate()
-    private_b64 = private_key.encode(encoder=Base64Encoder).decode("ascii")
-    public_b64 = private_key.public_key.encode(encoder=Base64Encoder).decode("ascii")
-    return private_b64, public_b64
+def _b64url(raw: bytes) -> str:
+    return base64.urlsafe_b64encode(raw).rstrip(b"=").decode("ascii")
+
+
+def sign_relay_token(secret: bytes, user_id: uuid.UUID, device_id: str, expires_at: int) -> str:
+    """Signs a token that lets one device open a session on any relay
+    sharing `secret`, until `expires_at` (unix seconds)."""
+    body = json.dumps(
+        {"uid": str(user_id), "dev": device_id, "exp": expires_at}, separators=(",", ":")
+    ).encode("utf-8")
+    encoded = _b64url(body)
+    signature = hmac.new(secret, encoded.encode("ascii"), hashlib.sha256).digest()
+    return f"{encoded}.{_b64url(signature)}"

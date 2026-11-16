@@ -104,6 +104,9 @@ All configuration is environment-driven (see `.env.example` for the full list wi
 | `CORS_ORIGINS` | comma-separated allowed origins, or `*` (dev only — lock this down in production) |
 | `MAX_DEVICES_PER_USER` | device registration cap per account, `0` = unlimited |
 | `RATE_LIMIT_STORAGE_URI` | empty = in-memory rate limiting; set to a Redis URI to share limits across instances |
+| `RELAY_SERVERS` | JSON list of relay servers handed to clients (see "Relay servers" below) |
+| `RELAY_TOKEN_SECRET` | secret shared with every relay, used to sign client tokens — **environment only, never commit** |
+| `RELAY_TOKEN_TTL_SECONDS` | lifetime of a relay token |
 | `DEBUG` | when `false`, unhandled exceptions never leak details to clients |
 
 **Production notes:**
@@ -111,6 +114,31 @@ All configuration is environment-driven (see `.env.example` for the full list wi
 - Set `DEBUG=false`.
 - Use a long, random `JWT_SECRET_KEY` (e.g. `openssl rand -hex 32`).
 - Point `RATE_LIMIT_STORAGE_URI` at Redis if running multiple app instances/workers, so rate limits are shared rather than per-process.
+
+## Relay servers
+
+Game traffic is routed by `nexora-relay`, a small standalone program that runs on each VPS (source: `nexora-core/` in the client repository; a Linux x86-64 build is in `deploy/relay/`). This backend does not proxy any traffic itself — it only tells a signed-in client which relays exist and signs a token they accept. Relays never call back here and keep no user data, so adding a server needs no database change.
+
+**Adding a relay**
+
+```sh
+# on the new VPS (needs iptables; UDP port 4700 must be open)
+sudo install -m 755 deploy/relay/nexora-relay /usr/local/bin/
+sudo mkdir -p /etc/nexora
+sudo nexora-relay init -out /etc/nexora/relay.json      # prints the relay's public key
+sudo cp deploy/relay/nexora-relay.service /etc/systemd/system/
+sudo systemctl enable --now nexora-relay
+```
+
+- **First relay:** copy `token_secret` from its `/etc/nexora/relay.json` into this backend's `RELAY_TOKEN_SECRET`.
+- **Every further relay:** before starting it, replace `token_secret` in its `relay.json` with that same value, so one token works on all of them. (`private_key` stays unique per relay.)
+- Add the relay to `RELAY_SERVERS` and restart the backend:
+
+```
+RELAY_SERVERS=[{"id":"fra1","name":"Frankfurt","region":"EU","address":"203.0.113.10:4700","public_key":"<printed by init>"}]
+```
+
+`relay.json` and `RELAY_TOKEN_SECRET` are secrets: keep them on the servers only.
 
 ## API reference
 
@@ -135,6 +163,7 @@ Base path: `/api/v1`. Endpoints marked "auth" require an `Authorization: Bearer 
 | GET | `/devices` | yes | List the current user's registered devices |
 | POST | `/devices/register` | yes | Register/update a device (enforces `MAX_DEVICES_PER_USER`) |
 | DELETE | `/devices/{device_id}` | yes | Remove a device and revoke its refresh tokens |
+| POST | `/relay/session` | yes | Relay list plus a signed token for the calling device (`{"device_id"}`); 503 until relays are configured |
 | GET | `/health` | — | Liveness check, no DB hit |
 | GET | `/health/db` | — | Readiness check, runs `SELECT 1` against the database |
 | POST | `/payments/webhook/lava` | — | Stub — returns 501, reserved for a future Lava integration |

@@ -28,7 +28,6 @@ from app.schemas.device import DeviceIn
 from app.services.email_service import email_service
 from app.services.proxy_service import ProxyService
 from app.services.token_service import TokenService
-from app.services.wireguard_service import WireguardService
 
 
 class AuthService:
@@ -40,7 +39,6 @@ class AuthService:
         self.verification_repo = VerificationRepository(session)
         self.token_service = TokenService(session)
         self.proxy_service = ProxyService(session)
-        self.wireguard_service = WireguardService(session)
 
     # ------------------------------------------------------------------
     # Registration
@@ -55,16 +53,14 @@ class AuthService:
         user = await self.user_repo.create(username, email, password_hash)
         await self.subscription_repo.create_default(user.id)
         await self.proxy_service.provision_for_user(user.id)
-        await self.wireguard_service.provision_for_user(user.id)
         await self._issue_and_send_code(user, VerificationPurpose.EMAIL_VERIFY)
 
         await self.session.commit()
-        # Credentials/peers are only useful once committed — sync the
-        # 3proxy users file and wg0.conf after the transaction succeeds,
-        # not before. A sync failure here is logged and self-heals on the
-        # next sync, never blocks registration.
+        # Credentials are only useful once committed — sync the 3proxy
+        # users file after the transaction succeeds, not before. A sync
+        # failure here is logged and self-heals on the next sync, never
+        # blocks registration.
         await self.proxy_service.sync_users_file()
-        await self.wireguard_service.sync_config_file()
         return user.id
 
     # ------------------------------------------------------------------

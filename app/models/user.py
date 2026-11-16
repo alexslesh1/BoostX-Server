@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from app.models.refresh_token import RefreshToken
     from app.models.subscription import Subscription
     from app.models.verification_code import VerificationCode
-    from app.models.wireguard_peer import WireguardPeer
 
 
 class User(Base):
@@ -56,9 +55,6 @@ class User(Base):
         back_populates="user", cascade="all, delete-orphan"
     )
     proxy_credential: Mapped["ProxyCredential"] = relationship(
-        back_populates="user", uselist=False, cascade="all, delete-orphan"
-    )
-    wireguard_peer: Mapped["WireguardPeer"] = relationship(
         back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
 
