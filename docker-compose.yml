@@ -7,7 +7,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-boostx}
       POSTGRES_DB: ${POSTGRES_DB:-boostx}
     ports:
-      - "5432:5432"
+      # Only reachable from this machine: the database is never exposed to
+      # the internet (Docker would otherwise bypass the host firewall).
+      - "127.0.0.1:5432:5432"
     volumes:
       - boostx_postgres_data:/var/lib/postgresql/data
     healthcheck:
