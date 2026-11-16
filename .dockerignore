@@ -10,8 +10,9 @@ __pycache__
 .pytest_cache
 .mypy_cache
 .ruff_cache
-README.md
 tests/
 .dockerignore
 Dockerfile
 docker-compose.yml
+# The relay binary and server scripts are not part of the API image.
+deploy/

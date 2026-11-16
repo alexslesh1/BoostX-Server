@@ -16,7 +16,8 @@ RUN apt-get update \
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-COPY pyproject.toml ./
+# README.md is the package readme (pyproject.toml): the build needs it.
+COPY pyproject.toml README.md ./
 COPY app ./app
 
 RUN pip install --upgrade pip \
