@@ -133,7 +133,7 @@ cat <<MSG
 Backend:  http://$PUBLIC_IP:8000/api/v1
 Relay:    $PUBLIC_IP:$RELAY_PORT  ($RELAY_NAME)
 
-Nexora.exe test builds talk to http://194.87.200.215:8000/api/v1 by default.
+Nexora.exe test builds talk to http://82.139.231.54:8000/api/v1 by default.
 If this server has another address, put this line into a file api_url.txt
 next to Nexora.exe:
 
